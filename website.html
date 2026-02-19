@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navkis College Enquiry Bot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        .chat-container {
+            width: 400px; height: 550px; background: black; border-radius: 12px;
+            display: flex; flex-direction: column; box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+
+        .chat-header { background: #1a73e8; color: white; padding: 15px; text-align: center; border-radius: 12px 12px 0 0; }
+        
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+
+        .message { padding: 10px 14px; border-radius: 15px; font-size: 14px; max-width: 85%; line-height: 1.5; }
+        .bot-msg { background: #e8f0fe; align-self: flex-start; color: #3c4043; border-bottom-left-radius: 2px; }
+        .user-msg { background: #1a73e8; align-self: flex-end; color: white; border-bottom-right-radius: 2px; }
+
+        .suggestions { display: flex; gap: 8px; padding: 10px; background: white; border-top: 1px solid #eee; overflow-x: auto; }
+        .suggest-btn { 
+            background: #f1f3f4; border: 1px solid #ddd; padding: 5px 12px; 
+            border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap;
+        }
+
+        .chat-input-area { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        #user-input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; outline: none; }
+        #send-btn { background: #1a73e8; color: white; border: none; padding: 10px 15px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>NAVKIS COLLEGE OF ENGINEERING Assistant powered by BRO CODE</h3>
+            <p style="font-size: 10px;">Affiliated with VTU</p>
+        </div>
+        <div id="chat-box" class="chat-box">
+            <div class="message bot-msg">Hello! I'm here to help. Ask about our <b>Hostel</b>, <b>Scholarship</b>, <b>Facilities</b>, <b>Courses</b>, or <b>Fees</b>.</div>
+        </div>
+        <div class="suggestions">
+            <button class="suggest-btn" onclick="quickReply('Facilities')">Facilities</button>
+            <button class="suggest-btn" onclick="quickReply('Hostel')">Hostel</button>
+            <button class="suggest-btn" onclick="quickReply('Scholarship')">Scholarship</button>
+            <button class="suggest-btn" onclick="quickReply('Fees')">Fees</button>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Type here..." autocomplete="off">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        const collegeData = {
+            "courses": {
+                keywords: ["course", "engineering", "be", "mtech", "subject", "branch"],
+                answer: "<b>Available Courses:</b><br>• Several undergraduate courses of BE in CSE, CSE(AI&ML), CSE(Cyber Security), AI&DS, AI&ML ECE, CIVIL, <br>• postgraduate course MCA"
+            },
+            "fees": {
+                keywords: ["fee", "cost", "tuition", "price"], 
+                answer: "<b>Fee Details:</b><br>• BE: most probably ₹2,50,000/year <br>• MCA: around ₹1,50,000/year"
+            },
+            "hostel": {
+                keywords: ["hostel", "boys", "girls", "accommodation", "stay"],
+                answer: "<b>Hostel Facilities:</b><br>• Separate hostels for Boys and Girls.<br>• <b>Fee:</b> ₹1,00,000 per annum.<br>• Includes 24/7 security and mess."
+            },
+            "scholarship": {
+                keywords: ["scholarship", "merit", "discount", "financial aid"],
+                answer: "<b>Scholarships:</b><br>• Concessions available for 90%+ in boards.<br>• Merit-based aid for KCET/COMEDK top rankers."
+            },
+            "facilities": {
+                keywords: ["facility", "facilities", "lab", "library", "sports", "gym", "placement"],
+                answer: "<b>Campus Facilities:</b><br>• 📚 Library (50k+ Books)<br>• 🔬 Modern Labs<br>• 🏀 Sports & Gym<br>• 💼 Placement Cell"
+            },
+            "contact": {
+                keywords: ["contact", "phone", "email", "website", "address"],
+                answer: "📞 +91-1234567890<br>📧 info@navkisengg.edu.in"
+            }
+        };
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = 'message ' + (type === 'user' ? 'user-msg' : 'bot-msg');
+            div.innerHTML = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function getBotResponse(msg) {
+            // This line ensures it works even if you type "FACILITIES" or "facilities "
+            const input = msg.toLowerCase().trim();
+            
+            for (let category in collegeData) {
+                // Check if the user's input contains any of our keywords
+                const match = collegeData[category].keywords.some(k => input.includes(k));
+                if (match) {
+                    return collegeData[category].answer;
+                }
+            }
+            return "I'm sorry, I don't have information on that. Try asking about 'Hostel', 'Scholarship' or 'Facilities'.";
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (text === "") return;
+            addMessage(text, 'user');
+            userInput.value = "";
+            setTimeout(() => {
+                const reply = getBotResponse(text);
+                addMessage(reply, 'bot');
+            }, 400);
+        }
+
+        function quickReply(val) {
+            userInput.value = val;
+            sendMessage();
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>
